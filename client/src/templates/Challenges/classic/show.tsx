@@ -62,6 +62,7 @@ import { XtermTerminal } from './xterm';
 import MultifileEditor from './multifile-editor';
 import DesktopLayout from './desktop-layout';
 import MobileLayout from './mobile-layout';
+import { mergeChallengeFiles } from './saved-challenges';
 
 import './classic.css';
 import '../components/test-frame.css';
@@ -162,11 +163,7 @@ const StepPreview = ({
     challengeType === challengeTypes.multifilePythonCertProject ? (
     <XtermTerminal xtermFitRef={xtermFitRef} />
   ) : (
-    <Preview
-      className='full-height'
-      disableIframe={disableIframe}
-      previewMounted={previewMounted}
-    />
+    <Preview disableIframe={disableIframe} previewMounted={previewMounted} />
   );
 };
 
@@ -355,7 +352,9 @@ function ShowClassic({
       return challenge.id === challengeMeta.id;
     });
 
-    createFiles(savedChallenge?.challengeFiles || challengeFiles || []);
+    createFiles(
+      mergeChallengeFiles(challengeFiles, savedChallenge?.challengeFiles)
+    );
 
     initTests(tests);
     if (showProjectPreview) openModal('projectPreview');
@@ -410,6 +409,8 @@ function ShowClassic({
       reduxChallengeFiles && (
         <MultifileEditor
           challengeFiles={reduxChallengeFiles}
+          block={block}
+          superBlock={superBlock}
           containerRef={containerRef}
           description={description}
           editorRef={editorRef}

@@ -34,21 +34,33 @@ export const getCsrfToken = (setCookies: string[]): string | undefined => {
 
 export const ORIGIN = 'https://www.freecodecamp.org';
 
+export const getCookies = (setCookies: string[]): string => {
+  for (const cookie of setCookies) {
+    expect(cookie).toMatch(/.*=.*/);
+  }
+  return setCookies.map(cookie => cookie.split(';')[0]).join('; ');
+};
+
 export function superRequest(
   resource: string,
   config: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     setCookies?: string[];
+    headers?: { referer: string };
   },
   options?: Options
 ): request.Test {
-  const { method, setCookies } = config;
+  const { method, setCookies, headers } = config;
   const { sendCSRFToken = true } = options ?? {};
 
   const req = requests[method](resource).set('Origin', ORIGIN);
 
   if (setCookies) {
-    void req.set('Cookie', setCookies);
+    void req.set('Cookie', getCookies(setCookies));
+  }
+
+  if (headers) {
+    void req.set('Referer', headers.referer);
   }
 
   const csrfToken = (setCookies && getCsrfToken(setCookies)) ?? '';
@@ -175,6 +187,7 @@ If you are seeing this error, the root cause is likely an error thrown in the be
 
 export const defaultUserId = '64c7810107dd4782d32baee7';
 export const defaultUserEmail = 'foo@bar.com';
+export const defaultUsername = 'fcc-test-user';
 
 export async function devLogin(): Promise<string[]> {
   await fastifyTestInstance.prisma.user.deleteMany({
@@ -184,7 +197,8 @@ export async function devLogin(): Promise<string[]> {
   await fastifyTestInstance.prisma.user.create({
     data: {
       ...createUserInput(defaultUserEmail),
-      id: defaultUserId
+      id: defaultUserId,
+      username: defaultUsername
     }
   });
   const res = await superRequest('/signin', { method: 'GET' });

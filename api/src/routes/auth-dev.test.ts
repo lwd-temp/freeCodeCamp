@@ -94,7 +94,7 @@ describe('dev login', () => {
           showPortfolio: false,
           showTimeLine: false
         },
-        progressTimestamps: [],
+        progressTimestamps: [expect.any(Number)],
         sendQuincyEmail: false,
         theme: 'default',
         username: expect.stringMatching(fccUuidRe),
@@ -180,9 +180,15 @@ describe('dev login', () => {
       const setCookie = res.headers['set-cookie'];
       expect(setCookie).toEqual(
         expect.arrayContaining([
-          'jwt_access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-          '_csrf=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-          'csrf_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+          expect.stringMatching(
+            /^jwt_access_token=; Path=\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT/
+          ),
+          expect.stringMatching(
+            /^csrf_token=; Path=\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT/
+          ),
+          expect.stringMatching(
+            /^_csrf=; Path=\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT/
+          )
         ])
       );
       expect(setCookie).toHaveLength(3);
